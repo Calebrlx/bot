@@ -18,16 +18,6 @@ const openai = new OpenAI({
 
 const newsapi = new NewsAPI('7e73302f019e47a39a38638b83625732');
 
-(async () => {
-	const client = new Client();
-	// You can also specify a token: const client = new Client({ token: 'token' });
-	await client.login('username', 'password');
-
-	await client.users.fetch(25025320).then(user => {
-		console.log(user);
-	});
-})();
-
 function postTweet(status) {
   client.post('statuses/update', {status}, function(error, tweet, response) {
     if (!error) {
