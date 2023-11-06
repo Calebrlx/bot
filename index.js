@@ -2,7 +2,7 @@ const http = require('http');
 const PORT = 3000;
 const Twitter = require('twitter');
 const OpenAI = require('openai');
-const { Client } = require('@threadsjs/threads.js');
+const NewsAPI = require('newsapi');
 require('dotenv').config();
 
 const client = new Twitter({
@@ -15,6 +15,8 @@ const client = new Twitter({
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+const newsapi = new NewsAPI('7e73302f019e47a39a38638b83625732');
 
 (async () => {
 	const client = new Client();
@@ -97,6 +99,18 @@ function scheduleNextAction() {
     setTimeout(customLogic, delay);
     currentStatus = 'Waiting to send the next tweet...';
   }
+}
+
+function news() {
+  newsapi.v2.topHeadlines({
+    sources: 'bbc-news,the-verge',
+    q: 'bitcoin',
+    category: 'business',
+    language: 'en',
+    country: 'us'
+  }).then(response => {
+    console.log(response);
+  });
 }
 
 // Place your custom logic here
