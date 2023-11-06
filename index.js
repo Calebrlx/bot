@@ -40,6 +40,8 @@ async function GPT() {
 // Post a tweet
 // postTweet('Hello World! My name is Relix');
 
+let nextTweetTime = '';
+let currentStatus = 'Waiting to send the next tweet...';
 
 // Random time generator function based on current time
 function generateRandomTime() {
@@ -72,14 +74,17 @@ function generateRandomTime() {
 // Schedule a function to run at the random time
 function scheduleNextAction() {
   const nextTime = generateRandomTime();
+  nextTweetTime = nextTime; // Store the next tweet time globally
 
   const delay = nextTime.getTime() - new Date().getTime();
   if (delay < 0) {
     // If for any reason the delay is negative, schedule immediately
     setImmediate(customLogic);
+    currentStatus = 'Sending tweet immediately due to time calculation error.';
   } else {
     console.log(`Next action scheduled for: ${nextTime}`);
     setTimeout(customLogic, delay);
+    currentStatus = 'Waiting to send the next tweet...';
   }
 }
 
@@ -90,18 +95,21 @@ function customLogic() {
 }
 
 const server = http.createServer((req, res) => {
+  // Serve an HTML page
   res.statusCode = 200;
   res.setHeader('Content-Type', 'text/html');
   res.end(`
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Relixs Twitter Scheduler</title>
-      <meta http-equiv="refresh" content="5"/> <!-- Page refreshes every 5 seconds -->
     </head>
     <body>
-      <h1>Relixs Twitter Scheduler</h1>
-      <p>Next tweet will be sent on: <strong>${nextTime}</strong></p>
+      <h1>Relixs Twitter Scheduler Status</h1>
+      <p>Next tweet will be sent at: ${nextTweetTime.toLocaleString()}</p>
+      <p>Current status: ${currentStatus}</p>
     </body>
     </html>
   `);
@@ -109,4 +117,5 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}/`);
-  scheduleNextAction(); // Initialize the schedule on server
+  scheduleNextAction(); // This will start the first scheduling
+});
