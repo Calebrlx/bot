@@ -91,11 +91,23 @@ function customLogic() {
 
 const server = http.createServer((req, res) => {
   res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World! Scheduled logic will execute as per random time set.');
+  res.setHeader('Content-Type', 'text/html');
+  res.end(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Relixs Twitter Scheduler</title>
+      <meta http-equiv="refresh" content="5"/> <!-- Page refreshes every 5 seconds -->
+    </head>
+    <body>
+      <h1>Relixs Twitter Scheduler</h1>
+      <p>Next tweet will be sent on: <strong>${nextTweetTime}</strong></p>
+      <p>Last status update: <strong>${lastStatusUpdate}</strong></p>
+    </body>
+    </html>
+  `);
 });
 
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}/`);
-  scheduleNextAction(); 
-});
+  scheduleNextAction(); // Initialize the schedule on server
