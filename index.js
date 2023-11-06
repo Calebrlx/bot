@@ -66,7 +66,7 @@ function generateRandomTime() {
   randomSecond = Math.floor(Math.random() * 60);
 
   // Set the random time for execution
-  scheduleDate.setHours(randomHour, randomMinute, randomSecond, 0);
+  scheduleDate.setHours(randomHour + 7, randomMinute, randomSecond, 0);
 
   return scheduleDate;
 }
