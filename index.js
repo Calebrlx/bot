@@ -2,6 +2,7 @@ const http = require('http');
 const PORT = 3000;
 const Twitter = require('twitter');
 const OpenAI = require('openai');
+const { Client } = require('@threadsjs/threads.js');
 require('dotenv').config();
 
 const client = new Twitter({
@@ -14,6 +15,16 @@ const client = new Twitter({
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+(async () => {
+	const client = new Client();
+	// You can also specify a token: const client = new Client({ token: 'token' });
+	await client.login('username', 'password');
+
+	await client.users.fetch(25025320).then(user => {
+		console.log(user);
+	});
+})();
 
 function postTweet(status) {
   client.post('statuses/update', {status}, function(error, tweet, response) {
