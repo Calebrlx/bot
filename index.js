@@ -1,7 +1,7 @@
 const http = require('http');
 const PORT = 3000;
 const Twitter = require('twitter');
-const { Configuration, OpenAIApi } = require('openai');
+const OpenAI = require('openai');
 require('dotenv').config();
 
 const client = new Twitter({
@@ -11,11 +11,9 @@ const client = new Twitter({
   access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 });
 
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-const openai = new OpenAIApi(configuration);
 
 function postTweet(status) {
   client.post('statuses/update', {status}, function(error, tweet, response) {
