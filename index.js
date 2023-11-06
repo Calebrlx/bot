@@ -101,8 +101,7 @@ const server = http.createServer((req, res) => {
     </head>
     <body>
       <h1>Relixs Twitter Scheduler</h1>
-      <p>Next tweet will be sent on: <strong>${nextTweetTime}</strong></p>
-      <p>Last status update: <strong>${lastStatusUpdate}</strong></p>
+      <p>Next tweet will be sent on: <strong>${nextTime}</strong></p>
     </body>
     </html>
   `);
