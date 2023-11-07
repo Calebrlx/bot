@@ -1,5 +1,5 @@
 const { TwitterApi } = require('twitter-api-v2');
-const logFilePath = './data/tweet_log.txt';
+const mysqlApi = require('./api/MySQL');
 require('dotenv').config();
 
 const client = new TwitterApi({
@@ -32,14 +32,24 @@ async function postTweet(status) {
     }
 }
 
+// Update logTweet to insert into the database
 function logTweet(tweet) {
-    const timestamp = new Date().toISOString();
-    const logEntry = `${timestamp} - ${tweet}\n`;
-    fs.appendFile(logFilePath, logEntry, function(err) {
-      if (err) throw err;
-      console.log('Saved tweet to log:', tweet);
+    // Extract necessary tweet information
+    const tweetId = tweet.data.id; // The ID of the tweet
+    const accountId = tweet.includes.users[0].id; // The ID of the account that posted the tweet
+    const tweetType = tweet.data.text.startsWith("RT") ? 'retweet' : 'tweet'; // Check if it's a retweet
+    const content = tweet.data.text; // The content of the tweet
+    
+    // Call addTweetLog to insert the data into the tweet_logs table
+    mysqlApi.addTweetLog(tweetId, accountId, tweetType, content, (error, results) => {
+        if (error) {
+            console.error('Error logging tweet to DB:', error);
+        } else {
+            console.log('Logged tweet to DB:', results);
+        }
     });
 }
+
 
 // Export the functions you want to make available
 module.exports = {
