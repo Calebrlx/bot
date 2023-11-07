@@ -6,7 +6,7 @@ const NewsAPI = require('newsapi');
 const { parse } = require('url');
 require('dotenv').config();
 const fs = require('fs');
-const logFilePath = 'tweet_log.txt';
+const logFilePath = './data/tweet_log.txt';
 const { TwitterApi } = require('twitter-api-v2');
 
 const client = new TwitterApi({
