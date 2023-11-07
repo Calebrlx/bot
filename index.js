@@ -1,16 +1,19 @@
 const http = require('http');
 const PORT = 3000;
-const Twitter = require('twitter');
 const OpenAI = require('openai');
 const NewsAPI = require('newsapi');
 require('dotenv').config();
 
-const client = new Twitter({
-  consumer_key: process.env.TWITTER_CONSUMER_KEY,
-  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-  access_token_key: process.env.TWITTER_ACCESS_TOKEN,
-  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+const { TwitterApi } = require('twitter-api-v2');
+
+const client = new TwitterApi({
+  appKey: process.env.TWITTER_CONSUMER_KEY,
+  appSecret: process.env.TWITTER_CONSUMER_SECRET,
+  accessToken: process.env.TWITTER_ACCESS_TOKEN,
+  accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
 });
+
+const rwClient = client.readWrite;
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -36,26 +39,21 @@ function postTweet(status) {
 
 */
 
-function postTweet(tweetData) { 
-  (async () => {
-    try {
-      // Note: the URL and the parameters are dependent on the Twitter API version you are using.
-      // Make sure you refer to the correct documentation for API v2.
-      const { data: responseData, errors } = await client.post('tweets', tweetData);
 
-      // If there's an error returned by the Twitter API, log the error message.
-      if (errors) {
-        console.log('Errors:', errors);
-      } else {
-        // If the request was successful, the new tweet's data would be logged here.
-        console.log('Tweet created:', responseData);
-      }
-    } catch (error) {
-      // In case of a network error or other Axios-related issue, it will be caught here.
-      console.error('Error posting the tweet:', error);
+
+async function postTweet(status) {
+    try {
+      const tweet = await rwClient.v2.tweet(status);
+    console.log("Successfully tweeted: ", tweet.data);
+    } catch (error) { 
+    console.error("Failed to tweet. Error: ", error);
+    if (error.response) { // error.response is available on axios errors
+    console.error("Response status code: ", error.response.status);
+      console.error("Response body: ", error.response.data);
     }
-  })();
+  } 
 }
+
 
 async function GPT() {
   // First step - getting ideas
@@ -106,9 +104,6 @@ async function GPT() {
   // Now postTweet should be a defined function that takes 'finalTweet' as the tweet text to post
   postTweet(finalTweet);
 }
-
-// Call the GPT function to perform the operations
-GPT().catch(console.error);
 
 let nextTweetTime = '';
 let currentStatus = 'Waiting to send the next tweet...';
