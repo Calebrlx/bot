@@ -18,6 +18,8 @@ const openai = new OpenAI({
 
 const newsapi = new NewsAPI('7e73302f019e47a39a38638b83625732');
 
+/*
+
 function postTweet(status) {
   client.post('statuses/update', {status}, function(error, tweet, response) {
     if (!error) {
@@ -30,6 +32,29 @@ function postTweet(status) {
       }
     }
   });
+}
+
+*/
+
+function postTweet(tweetData) { 
+  (async () => {
+    try {
+      // Note: the URL and the parameters are dependent on the Twitter API version you are using.
+      // Make sure you refer to the correct documentation for API v2.
+      const { data: responseData, errors } = await client.post('tweets', tweetData);
+
+      // If there's an error returned by the Twitter API, log the error message.
+      if (errors) {
+        console.log('Errors:', errors);
+      } else {
+        // If the request was successful, the new tweet's data would be logged here.
+        console.log('Tweet created:', responseData);
+      }
+    } catch (error) {
+      // In case of a network error or other Axios-related issue, it will be caught here.
+      console.error('Error posting the tweet:', error);
+    }
+  })();
 }
 
 async function GPT() {
