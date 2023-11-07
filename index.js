@@ -7,7 +7,6 @@ const { parse } = require('url');
 require('dotenv').config();
 const fs = require('fs');
 const logFilePath = 'tweet_log.txt';
-
 const { TwitterApi } = require('twitter-api-v2');
 
 const client = new TwitterApi({
@@ -18,32 +17,17 @@ const client = new TwitterApi({
 });
 
 const rwClient = client.readWrite;
-
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 const newsapi = new NewsAPI('7e73302f019e47a39a38638b83625732');
 
-/*
+const ideasSys = "You are an AI managing the Twitter page for Relixs, an innovative AI service provider. Craft tweets that are creative, engaging, and shareable to elevate brand visibility among young adults aged 18 to 24—a group that may be interested in tech but isnt deeply acquainted with AI. Highlight the practicality and fascination of AI technology in everyday life, using a conversational tone that resonates with this demographic. Include varied content such as intriguing AI facts, light humor, user interactive polls, and tech tips to spark curiosity and dialogue. Every tweet should reflect Relixs cutting-edge expertise and friendly approach to technology, enticing followers to learn more and engage with the brand. Encourage interaction by asking questions or inviting followers to share their views on AI, and always include a call to action when appropriate."
 
-function postTweet(status) {
-  client.post('statuses/update', {status}, function(error, tweet, response) {
-    if (!error) {
-      console.log("Successfully tweeted: " + tweet.text);
-    } else {
-      console.error("Failed to tweet. Error:", error);
-      if (response) {
-        console.log("Response statusCode:", response.statusCode);
-        console.log("Response body:", response.body);
-      }
-    }
-  });
-}
+const evalSys = "You are an AI tasked with assessing the impact and engagement potential of tweet concepts for Relixs’s Twitter page, targeting young adults aged 18 to 24. Review the provided tweet concepts, considering factors such as relevance to the AI industry, likelihood to inspire engagement (likes, retweets, replies), and alignment with Relixss brand voice. Your objective is to critically evaluate each tweet for its creativity, engagement level, clarity, and call to action. Identify the tweet that you anticipate will perform the best based on these criteria, and explain your rationale for the selection"
 
-*/
-
-
+const finalSys = "You are an AI tasked with choosing the final tweet to post for Relixs. Review the potential tweets and their corresponding analyses to select the most effective one for engagement with an 18 to 24-year-old demographic. End your response with the final tweet text only."
 
 async function postTweet(status) {
   if (!tweetPostingEnabled) {
@@ -64,13 +48,12 @@ async function postTweet(status) {
   }
 }
 
-
 async function GPT() {
   // First step - getting ideas
   const ideasResponse = await openai.chat.completions.create({
     messages: [{
       role: 'system', 
-      content: 'You are an AI managing the Twitter page for Relixs, an innovative AI service provider. Craft tweets that are creative, engaging, and shareable to elevate brand visibility among young adults aged 18 to 24—a group that may be interested in tech but isnt deeply acquainted with AI. Highlight the practicality and fascination of AI technology in everyday life, using a conversational tone that resonates with this demographic. Include varied content such as intriguing AI facts, light humor, user interactive polls, and tech tips to spark curiosity and dialogue. Every tweet should reflect Relixs cutting-edge expertise and friendly approach to technology, enticing followers to learn more and engage with the brand. Encourage interaction by asking questions or inviting followers to share their views on AI, and always include a call to action when appropriate.'
+      content: ideasSys
     }, {
       role: 'user', 
       content: 'Could you draft five tweet concepts based on the guidance provided? Id love to see a mix of content types, from AI facts to interactive elements. Lets make them catchy!'
@@ -85,7 +68,7 @@ async function GPT() {
   const evalResponse = await openai.chat.completions.create({
     messages: [{
       role: 'system', 
-      content: 'You are an AI tasked with assessing the impact and engagement potential of tweet concepts for Relixs’s Twitter page, targeting young adults aged 18 to 24. Review the provided tweet concepts, considering factors such as relevance to the AI industry, likelihood to inspire engagement (likes, retweets, replies), and alignment with Relixss brand voice. Your objective is to critically evaluate each tweet for its creativity, engagement level, clarity, and call to action. Identify the tweet that you anticipate will perform the best based on these criteria, and explain your rationale for the selection'
+      content: evalSys
     }, {
       role: 'user', 
       content: 'Based on prior analysis, the third tweet was determined to be the most effective due to its balance of informative content and a clear call to action. Here are the tweets for a final review: ' + ideaContents
@@ -100,7 +83,7 @@ async function GPT() {
   const finalResponse = await openai.chat.completions.create({
     messages: [{
       role: 'system', 
-      content: 'You are an AI tasked with choosing the final tweet to post for Relixs. Review the potential tweets and their corresponding analyses to select the most effective one for engagement with an 18 to 24-year-old demographic. End your response with the final tweet text only.'
+      content: finalSys
     }, {
       role: 'user', 
       content: 'Based on prior analysis, the third tweet was determined to be the most effective due to its balance of informative content and a clear call to action. Here are the tweets for a final review: ' + evalContent
