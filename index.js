@@ -1,7 +1,9 @@
 const http = require('http');
+const WebSocket = require('ws');
 const PORT = 3000;
 const OpenAI = require('openai');
 const NewsAPI = require('newsapi');
+const { parse } = require('url');
 require('dotenv').config();
 
 const { TwitterApi } = require('twitter-api-v2');
@@ -172,16 +174,26 @@ function customLogic() {
 }
 
 const server = http.createServer((req, res) => {
-  if (req.url === '/tweet-now') {
-    customLogic();
-    currentStatus = 'Tweet sent!';
-    res.writeHead(302, { 'Location': '/' });
-    res.end();
-  } else if (req.url === '/reset-timer') {
-    scheduleNextAction();
-    currentStatus = 'Timer reset, waiting to tweet...';
-    res.writeHead(302, { 'Location': '/' });
-    res.end();
+  const { pathname } = parse(req.url, true);
+  
+  if (req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk; // Convert Buffer to string
+    });
+    req.on('end', () => {
+      if (pathname === '/tweet-now') {
+        customLogic();
+        currentStatus = 'Tweet sent!';
+        res.writeHead(302, { 'Location': '/' });
+        res.end();
+      } else if (pathname === '/reset-timer') {
+        scheduleNextAction();
+        currentStatus = 'Timer reset, waiting to tweet...';
+        res.writeHead(302, { 'Location': '/' });
+        res.end();
+      }
+      });
   } else {
     // Serve an HTML page with improved UI and dark mode
     res.statusCode = 200;
@@ -233,6 +245,17 @@ const server = http.createServer((req, res) => {
           input[type=submit]:hover {
             background-color: #444;
           }
+          #terminal {
+            background-color: #000;
+            color: #37FDFC;
+            border: 1px solid #333;
+            padding: 10px;
+            width: 100%;
+            height: 300px;
+            overflow-y: scroll;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre;
+          }
         </style>
       </head>
       <body>
@@ -249,13 +272,53 @@ const server = http.createServer((req, res) => {
             <input type="submit" value="Reset Timer" />
           </form>
         </div>
+        <div id="terminal"></div>
       </body>
+      <script>
+      // Create WebSocket connection.
+      const socket = new WebSocket('ws://localhost:3000');
+
+      // Connection opened
+      socket.addEventListener('open', function(event) {
+        console.log('Connected to WS Server')
+      });
+
+      // Listen for messages
+      socket.addEventListener('message', function(event) {
+        const logEntry = JSON.parse(event.data);
+        if(logEntry.type === 'log') {
+          const terminal = document.getElementById('terminal');
+          // Append received message to the terminal
+          terminal.textContent += logEntry.message + '\n';
+          // Auto scroll to the bottom of the terminal
+          terminal.scrollTop = terminal.scrollHeight;
+        }
+      });
+      </script>
       </html>
     `);
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/`);
-  scheduleNextAction(); // Start the schedule
+
+const wss = new WebSocket.Server({ server });
+
+wss.broadcast = function broadcast(data) {
+  wss.clients.forEach(function each(client) {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(data);
+    }
+  });
+};
+
+const originalConsoleLog = console.log;
+console.log = function(...args) {
+  originalConsoleLog.apply(console, args);
+  // Send the log to the WebSocket
+  wss.broadcast(JSON.stringify({ type: 'log', message: args.join(' ') }));
+};
+
+server.listen(PORT, function listening() {
+  console.log(`Listening on ${server.address().port}`);
+  scheduleNextAction();
 });
