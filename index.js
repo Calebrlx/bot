@@ -35,18 +35,20 @@ function postTweet(status) {
 async function GPT() {
   const ideas = await openai.chat.completions.create({
     messages: [{ role: 'system', content: 'You are an AI managing the Twitter page for Relixs, an innovative AI service provider. Craft tweets that are creative, engaging, and shareable to elevate brand visibility among young adults aged 18 to 24—a group that may be interested in tech but isnt deeply acquainted with AI. Highlight the practicality and fascination of AI technology in everyday life, using a conversational tone that resonates with this demographic. Include varied content such as intriguing AI facts, light humor, user interactive polls, and tech tips to spark curiosity and dialogue. Every tweet should reflect Relixs cutting-edge expertise and friendly approach to technology, enticing followers to learn more and engage with the brand. Encourage interaction by asking questions or inviting followers to share their views on AI, and always include a call to action when appropriate.' }, { role: 'user', content: 'Could you draft five tweet concepts based on the guidance provided? Id love to see a mix of content types, from AI facts to interactive elements. Lets make them catchy!' }],
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4',
   });
   const eval = await openai.chat.completions.create({
     messages: [{ role: 'system', content: 'You are an AI tasked with assessing the impact and engagement potential of tweet concepts for Relixs’s Twitter page, targeting young adults aged 18 to 24. Review the provided tweet concepts, considering factors such as relevance to the AI industry, likelihood to inspire engagement (likes, retweets, replies), and alignment with Relixss brand voice. Your objective is to critically evaluate each tweet for its creativity, engagement level, clarity, and call to action. Identify the tweet that you anticipate will perform the best based on these criteria, and explain your rationale for the selection.' }, { role: 'user', content: 'Here are the tweet concepts weve generated:' + ideas + '. Which one do you think we should post first, and why?' }],
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4',
   });
-  const final = await openai.chat.completions.create({
+  const finalResponse = await openai.chat.completions.create({
     messages: [{ role: 'system', content: 'You are an AI tasked with choosing the final tweet to post for Relixs. Review the potential tweets and their corresponding analyses to select the most effective one for engagement with an 18 to 24-year-old demographic. End your response with the final tweet text only.' }, {role: 'user', content: 'Based on prior analysis, the third tweet was determined to be the most effective due to its balance of informative content and a clear call to action. Here are the tweets for a final review:' + eval}],
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4',
   });
-  console.log(final);
-  postTweet(final);
+
+  const finalTweet = finalResponse.data.choices[0].message.content.trim();
+  console.log(finalTweet);
+//  postTweet(final);
 }
 
 let nextTweetTime = '';
