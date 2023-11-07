@@ -35,7 +35,7 @@ async function tweetIdeas() {
 }
 
 
-async function evalTweets(tweets) {
+async function evalTweets(ideaContents) {
     try {
         // Second step - evaluating tweets
         const evalResponse = await openai.chat.completions.create({
@@ -58,7 +58,7 @@ async function evalTweets(tweets) {
     }
 }
 
-async function finalTweet(analysis) {
+async function finalTweet(evalContent) {
     try {
         // Third step - selecting the final tweet to post
         const finalResponse = await openai.chat.completions.create({
