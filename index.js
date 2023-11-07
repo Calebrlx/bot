@@ -46,9 +46,14 @@ async function GPT() {
     model: 'gpt-4',
   });
 
-  const finalTweet = finalResponse.data.choices[0].message.content.trim();
-  console.log(finalTweet);
-//  postTweet(final);
+  if (finalResponse && finalResponse.choices && finalResponse.choices.length > 0) {
+    const finalMessage = finalResponse.choices[0].message.content.trim(); // Adjusted for expected response format.
+    console.log(finalMessage);
+    //postTweet(finalMessage); // Post the final tweet text
+  } else {
+    // Handle the case where the expected path does not exist
+    console.error('Unexpected response structure:', finalResponse);
+  }
 }
 
 let nextTweetTime = '';
