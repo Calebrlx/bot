@@ -45,6 +45,7 @@ async function GPT() {
     messages: [{ role: 'system', content: 'You are an AI tasked with choosing the final tweet to post for Relixs. Review the potential tweets and their corresponding analyses to select the most effective one for engagement with an 18 to 24-year-old demographic. End your response with the final tweet text only.' }, {role: 'user', content: 'Based on prior analysis, the third tweet was determined to be the most effective due to its balance of informative content and a clear call to action. Here are the tweets for a final review:' + eval}],
     model: 'gpt-3.5-turbo',
   });
+  console.log(final);
   postTweet(final);
 }
 
@@ -108,34 +109,52 @@ function news() {
   });
 }
 
-// Place your custom logic here
 function customLogic() {
-  GPT()
+  // Your logic to trigger a tweet goes here...
+  GPT();
   scheduleNextAction();
 }
 
 const server = http.createServer((req, res) => {
-  // Serve an HTML page
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/html');
-  res.end(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Relixs Twitter Scheduler</title>
-    </head>
-    <body>
-      <h1>Relixs Twitter Scheduler Status</h1>
-      <p>Next tweet will be sent at: ${nextTweetTime.toLocaleString()}</p>
-      <p>Current status: ${currentStatus}</p>
-    </body>
-    </html>
-  `);
+  if (req.url === '/tweet-now') {
+    customLogic();
+    currentStatus = 'Tweet sent!';
+    res.writeHead(302, { 'Location': '/' });
+    res.end();
+  } else if (req.url === '/reset-timer') {
+    scheduleNextAction();
+    currentStatus = 'Timer reset, waiting to tweet...';
+    res.writeHead(302, { 'Location': '/' });
+    res.end();
+  } else {
+    // Serve an HTML page
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/html');
+    res.end(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Relixs Twitter Scheduler</title>
+      </head>
+      <body>
+        <h1>Relixs Twitter Scheduler Status</h1>
+        <p>Next tweet will be sent at: ${nextTweetTime.toLocaleString("en-US", {timeZone: "America/Denver"})}</p>
+        <p>Current status: ${currentStatus}</p>
+        <form action="/tweet-now" method="post">
+          <input type="submit" value="Tweet Now" />
+        </form>
+        <form action="/reset-timer" method="post">
+          <input type="submit" value="Reset Timer" />
+        </form>
+      </body>
+      </html>
+    `);
+  }
 });
 
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}/`);
-  scheduleNextAction(); // This will start the first scheduling
+  scheduleNextAction(); // Start the schedule
 });
