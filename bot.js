@@ -40,11 +40,11 @@ function scheduleNextAction() {
     const delay = nextTime.getTime() - new Date().getTime();
     if (delay < 0) {
       // If for any reason the delay is negative, schedule immediately
-      setImmediate(customLogic);
+      setImmediate(main);
       currentStatus = 'Sending tweet immediately due to time calculation error.';
     } else {
       console.log(`Next action scheduled for: ${nextTime}`);
-      setTimeout(customLogic, delay);
+      setTimeout(main, delay);
       currentStatus = 'Waiting to send the next tweet...';
     }
 }
