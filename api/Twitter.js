@@ -1,5 +1,5 @@
 const { TwitterApi } = require('twitter-api-v2');
-const mysqlApi = require('/api/MySQL');
+const mysqlApi = require('/api/MySQL.js');
 require('dotenv').config();
 
 const client = new TwitterApi({
