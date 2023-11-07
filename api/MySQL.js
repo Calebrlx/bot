@@ -1,4 +1,3 @@
-// Import the mysql2 package
 const mysql = require('mysql2');
 
 // Create a connection to the database
