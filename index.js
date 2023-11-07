@@ -43,6 +43,30 @@ app.post('/toggle-posting', async (req, res) => {
   res.send(message); // Send back the current state as response.
 });
 
+// Add this to handle delete requests from your application front-end
+app.post('/delete-tweet', async (req, res) => {
+  // You need to send 'tweetId' from the client to delete the specific tweet.
+  // Here, we assume you will use x-www-form-urlencoded content type
+  // and 'tweetId' will be a field in the POST request body.
+  // Don't forget to use `app.use(express.urlencoded({extended: true}));` middleware to parse the POST body.
+
+  const { tweetId } = req.body; // Replace with the actual parsing logic according to your frontend
+
+  if (!tweetId) {
+    res.status(400).send('Tweet ID is required');
+    return;
+  }
+
+  try {
+    await bot.deleteTweet(tweetId); // Assuming you export deleteTweet in bot.js
+    res.send(`Tweet with ID ${tweetId} is scheduled for deletion.`); // Or redirect as needed
+  } catch (error) {
+    console.error(`Error deleting tweet with ID ${tweetId}:`, error);
+    res.status(500).send(`Error deleting tweet with ID ${tweetId}.`);
+  }
+});
+
+
 // Initialize WebSocket server.
 const wss = new WebSocket.Server({ server });
 

@@ -26,8 +26,8 @@ async function tweetIdeas() {
         });
 
         // Parse the ideas into a format that can be concatenated into a follow-up message
-        const ideaContents = ideasResponse.choices[0].message.content;
-        return ideasResponse; 
+        const ideaContent = ideasResponse.choices[0].message.content;
+        return ideascontent; 
     } catch (error) {
         console.error("Error getting tweet ideas:", error);
         throw error; 
@@ -35,7 +35,11 @@ async function tweetIdeas() {
 }
 
 
-async function evalTweets(ideaContents) {
+async function evalTweets(ideaContent) {
+    if (!ideaContents) { 
+        console.log("No input");
+        return;
+    }
     try {
         // Second step - evaluating tweets
         const evalResponse = await openai.chat.completions.create({
@@ -44,7 +48,7 @@ async function evalTweets(ideaContents) {
                 content: evalSys
             }, {
                 role: 'user', 
-                content: 'Based on prior analysis, the third tweet was determined to be the most effective due to its balance of informative content and a clear call to action. Here are the tweets for a final review: ' + ideaContents
+                content: 'Based on prior analysis, the third tweet was determined to be the most effective due to its balance of informative content and a clear call to action. Here are the tweets for a final review: ' + ideaContent
             }],
             model: 'gpt-4',
             });
@@ -59,6 +63,10 @@ async function evalTweets(ideaContents) {
 }
 
 async function finalTweet(evalContent) {
+    if (!evalContent) { 
+        console.log("No input");
+        return;
+    }
     try {
         // Third step - selecting the final tweet to post
         const finalResponse = await openai.chat.completions.create({
@@ -74,7 +82,6 @@ async function finalTweet(evalContent) {
         
         // Extract the final tweet
         const finalTweet = finalResponse.choices[0].message.content.trim();
-
         return(finalTweet)
     } catch (error) {
         console.error("Error selecting final tweet:", error);

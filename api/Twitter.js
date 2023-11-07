@@ -32,6 +32,27 @@ async function postTweet(status) {
     }
 }
 
+// Function to delete a tweet
+async function deleteTweet(tweetId) {
+    if (!tweetPostingEnabled) {
+      console.log("Tweet deletion is disabled.");
+      return;
+    }
+  
+    try {
+      await rwClient.v2.deleteTweet(tweetId); // Deletes the tweet
+      console.log(`Successfully deleted tweet with ID: ${tweetId}`);
+      // You might also want to remove this tweet's log from the database here if necessary
+    } catch (error) {
+      console.error(`Failed to delete tweet with ID ${tweetId}. Error: `, error);
+      if (error?.response) { // Optional chaining for safety
+        console.error("Response status code: ", error.response.status);
+        console.error("Response body: ", error.response.data);
+      }
+      throw error; // Re-throw the error for the caller to handle
+    }
+  }
+
 // Update logTweet to insert into the database
 function logTweet(tweet) {
     // Extract necessary tweet information
@@ -54,5 +75,6 @@ function logTweet(tweet) {
 // Export the functions you want to make available
 module.exports = {
     postTweet,
-    logTweet 
+    logTweet,
+    deleteTweet
 };
