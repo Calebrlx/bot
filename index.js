@@ -224,13 +224,14 @@ const server = http.createServer((req, res) => {
             margin: 10px 0;
             border: none;
             border-radius: 5px;
-            background-color: #1E90FF;
-            color: white;
+            background-color: #333;
+            color: #ddd;
             cursor: pointer;
             font-size: 18px;
+            transition: background-color 0.3s ease;
           }
           input[type=submit]:hover {
-            background-color: #4169E1;
+            background-color: #444;
           }
         </style>
       </head>
