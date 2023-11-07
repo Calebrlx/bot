@@ -5,6 +5,8 @@ const OpenAI = require('openai');
 const NewsAPI = require('newsapi');
 const { parse } = require('url');
 require('dotenv').config();
+const fs = require('fs');
+const logFilePath = 'tweet_log.txt';
 
 const { TwitterApi } = require('twitter-api-v2');
 
@@ -44,16 +46,22 @@ function postTweet(status) {
 
 
 async function postTweet(status) {
-    try {
-      const tweet = await rwClient.v2.tweet(status);
-    console.log("Successfully tweeted: ", tweet.data);
-    } catch (error) { 
-    console.error("Failed to tweet. Error: ", error);
-    if (error.response) { // error.response is available on axios errors
-    console.error("Response status code: ", error.response.status);
-      console.error("Response body: ", error.response.data);
-    }
-  } 
+  if (!tweetPostingEnabled) {
+    console.log("Tweet posting is disabled.");
+    return;
+  } else {
+      try {
+        const tweet = await rwClient.v2.tweet(status);
+      console.log("Successfully tweeted: ", tweet.data);
+      logTweet(tweet.data);
+      } catch (error) { 
+      console.error("Failed to tweet. Error: ", error);
+      if (error.response) { // error.response is available on axios errors
+      console.error("Response status code: ", error.response.status);
+        console.error("Response body: ", error.response.data);
+      }
+    } 
+  }
 }
 
 
@@ -107,8 +115,18 @@ async function GPT() {
   postTweet(finalTweet);
 }
 
+function logTweet(tweet) {
+  const timestamp = new Date().toISOString();
+  const logEntry = `${timestamp} - ${tweet}\n`;
+  fs.appendFile(logFilePath, logEntry, function(err) {
+    if (err) throw err;
+    console.log('Saved tweet to log:', tweet);
+  });
+}
+
 let nextTweetTime = '';
 let currentStatus = 'Waiting to send the next tweet...';
+let tweetPostingEnabled = true;
 
 // Random time generator function based on current time
 function generateRandomTime() {
@@ -192,6 +210,13 @@ const server = http.createServer((req, res) => {
         currentStatus = 'Timer reset, waiting to tweet...';
         res.writeHead(302, { 'Location': '/' });
         res.end();
+      } else if (req.url === '/toggle-posting') {
+        tweetPostingEnabled = !tweetPostingEnabled;
+        const message = `Tweet posting is now ${tweetPostingEnabled ? 'enabled' : 'disabled'}.`;
+        console.log(message);
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end(message);
+        return;
       }
       });
   } else {
@@ -261,6 +286,9 @@ const server = http.createServer((req, res) => {
       <body>
         <div class="container">
           <h1>Relixs Twitter Scheduler Status</h1>
+          <form action="/toggle-posting" method="post">
+            <input type="submit" value="Toggle Tweet Posting" />
+          </form>
           <div class="status">
             <p>Next tweet will be sent at: ${nextTweetTime.toLocaleString("en-US", {timeZone: "America/Denver"})}</p>
             <p>Current status: ${currentStatus}</p>
