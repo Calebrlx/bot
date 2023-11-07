@@ -188,7 +188,7 @@ const server = http.createServer((req, res) => {
     res.writeHead(302, { 'Location': '/' });
     res.end();
   } else {
-    // Serve an HTML page
+    // Serve an HTML page with improved UI and dark mode
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/html');
     res.end(`
@@ -198,22 +198,66 @@ const server = http.createServer((req, res) => {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Relixs Twitter Scheduler</title>
+        <style>
+          body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+          }
+          h1, p {
+            text-align: center;
+          }
+          .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+          }
+          .status {
+            background-color: #222;
+            padding: 10px;
+            border: 1px solid #333;
+            margin: 20px 0;
+          }
+          input[type=submit] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background-color: #1E90FF;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+          }
+          input[type=submit]:hover {
+            background-color: #4169E1;
+          }
+        </style>
       </head>
       <body>
-        <h1>Relixs Twitter Scheduler Status</h1>
-        <p>Next tweet will be sent at: ${nextTweetTime.toLocaleString("en-US", {timeZone: "America/Denver"})}</p>
-        <p>Current status: ${currentStatus}</p>
-        <form action="/tweet-now" method="post">
-          <input type="submit" value="Tweet Now" />
-        </form>
-        <form action="/reset-timer" method="post">
-          <input type="submit" value="Reset Timer" />
-        </form>
+        <div class="container">
+          <h1>Relixs Twitter Scheduler Status</h1>
+          <div class="status">
+            <p>Next tweet will be sent at: ${nextTweetTime.toLocaleString("en-US", {timeZone: "America/Denver"})}</p>
+            <p>Current status: ${currentStatus}</p>
+          </div>
+          <form action="/tweet-now" method="post">
+            <input type="submit" value="Tweet Now" />
+          </form>
+          <form action="/reset-timer" method="post">
+            <input type="submit" value="Reset Timer" />
+          </form>
+        </div>
       </body>
       </html>
     `);
   }
 });
+
 
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}/`);
