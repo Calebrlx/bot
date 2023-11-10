@@ -27,7 +27,7 @@ async function tweetIdeas() {
 
         // Parse the ideas into a format that can be concatenated into a follow-up message
         const ideaContent = ideasResponse.choices[0].message.content;
-        return ideasContent; 
+        return ideasContent;
     } catch (error) {
         console.error("Error getting tweet ideas:", error);
         throw error; 
