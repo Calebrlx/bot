@@ -1,5 +1,5 @@
 const { TwitterApi } = require('twitter-api-v2');
-const mysqlApi = require('./MySQL.js');
+const MySQL = require('./MySQL.js');
 require('dotenv').config();
 
 const client = new TwitterApi({
@@ -21,6 +21,10 @@ async function postTweet(status) {
     try {
         const tweet = await rwClient.v2.tweet(status);
         console.log("Successfully tweeted: ", tweet);
+        
+        // Log the tweet to the database after successfully tweeting
+        logTweet(tweet);
+
         return tweet; // Return the tweet object if you need it outside
     } catch (error) {
         console.error("Failed to tweet. Error: ", error);
@@ -31,6 +35,7 @@ async function postTweet(status) {
         throw error; // Re-throw the error for the caller to handle
     }
 }
+
 
 // Function to delete a tweet
 async function deleteTweet(tweetId) {
@@ -62,7 +67,7 @@ function logTweet(tweet) {
     const content = tweet.data.text; // The content of the tweet
     
     // Call addTweetLog to insert the data into the tweet_logs table
-    mysqlApi.addTweetLog(tweetId, accountId, tweetType, content, (error, results) => {
+    MySQL.addTweetLog(tweetId, accountId, tweetType, content, (error, results) => {
         if (error) {
             console.error('Error logging tweet to DB:', error);
         } else {
