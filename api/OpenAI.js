@@ -81,13 +81,24 @@ async function finalTweet(evalContent) {
         });
         
         // Extract the final tweet
-        const finalTweet = finalResponse.choices[0].message.content.trim();
+        let finalTweet = finalResponse.choices[0].message.content.trim();
+        // Format final tweet using the formatFinal function
+        finalTweet = formatFinal(finalTweet);
         return(finalTweet)
     } catch (error) {
         console.error("Error selecting final tweet:", error);
         throw error;
     }
 }
+
+function formatFinal(tweet) {
+    // Remove quotes at the beginning and end if present
+    if (tweet.startsWith('"') && tweet.endsWith('"')) {
+        return tweet.substring(1, tweet.length - 1);
+    }
+    return tweet;
+}
+
 
 module.exports = {
     tweetIdeas,
