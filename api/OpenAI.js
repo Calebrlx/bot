@@ -36,7 +36,7 @@ async function tweetIdeas() {
 
 
 async function evalTweets(ideaContent) {
-    if (!ideaContents) { 
+    if (!ideaContent) { 
         console.log("No input");
         return;
     }
