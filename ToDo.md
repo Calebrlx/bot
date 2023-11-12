@@ -1,0 +1,3 @@
+- Implement blog bot functionality
+- Revise prompts
+- Test implementaition with other ml models 
